@@ -1,0 +1,91 @@
+/* General Styles */
+html,
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  /* Transparent background */
+  color: #000;
+  transition: background-color 0.3s, color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 50vw;
+  /* Scales dynamically */
+  min-height: 60vh;
+}
+
+/* App Container */
+#app {
+  display: grid;
+  gap: 15px;
+  width: 90%;
+  /* Scales dynamically */
+  max-width: 500px;
+  height: auto;
+  /* Adjusts dynamically */
+  background: linear-gradient(135deg, rgba(255, 218, 193, 0.8), rgba(212, 191, 255, 0.8));
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  /* Prevents content overflow */
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Textarea */
+textarea {
+  width: 100%;
+  /* Ensures textarea doesn't overflow */
+  height: auto;
+  /* Adjusts dynamically */
+  min-height: 100px;
+  /* Initial size */
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  resize: both;
+  /* Allow both horizontal and vertical resizing */
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* Footer Buttons */
+.footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+}
+
+.btn-icon img {
+  width: 100%;
+  height: auto;
+}
+
+/* Modal */
+.modal-content {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+body.dark .modal-content {
+  background: rgba(34, 34, 34, 0.9);
+}

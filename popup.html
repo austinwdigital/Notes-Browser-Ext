@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Note</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="app">
+    <header class="header">
+      <h1>Quick Note</h1>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider round"></span>
+      </label>
+    </header>
+    <textarea id="note" placeholder="Write your notes here..."></textarea>
+    <footer class="footer">
+      <!-- Cancel Icon -->
+      <button id="clearBtn" class="btn btn-icon">
+        <img src="cancel-icon.svg" alt="Clear" />
+      </button>
+      <!-- Export Icon -->
+      <button id="exportBtn" class="btn btn-icon">
+        <img src="export-icon.svg" alt="Export" />
+      </button>
+    </footer>
+    <div id="confirmModal" class="modal">
+      <div class="modal-content">
+        <p>Are you sure you want to clear your notes?</p>
+        <div class="modal-buttons">
+          <button id="confirmYes" class="btn">Yes</button>
+          <button id="confirmNo" class="btn btn-clear">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
