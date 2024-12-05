@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize markdown-it 
+  const md = new markdownit({
+    html: false,        // Disable HTML tags in source
+    breaks: true,       // Convert '\n' in paragraphs into <br>
+    linkify: true,      // Autoconvert URL-like text to links
+    typographer: true,  // Enable smartquotes and other typographic replacements
+  });
+
   // DOM Elements
   const elements = {
     noteArea: document.getElementById("note"),
@@ -21,8 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     editTitleModal: document.getElementById("editTitleModal"),
     editNoteTitleInput: document.getElementById("editNoteTitleInput"),
     saveEditBtn: document.getElementById("saveEditBtn"),
-    cancelEditBtn: document.getElementById("cancelEditBtn")
+    cancelEditBtn: document.getElementById("cancelEditBtn"),
+    previewBtn: document.getElementById("previewBtn"),
+    previewArea: document.createElement("div")
   };
+
+  // Initialize preview area
+  elements.previewArea.className = "preview-mode";
+  elements.noteArea.parentNode.insertBefore(elements.previewArea, elements.noteArea.nextSibling);
 
   let state = {
     currentNoteId: null,
@@ -240,6 +254,32 @@ document.addEventListener("DOMContentLoaded", () => {
       elements.editNoteTitleInput.value = "";
     },
 
+    togglePreview() {
+      const isPreview = elements.previewArea.classList.contains("active");
+      const previewIcon = elements.previewBtn.querySelector(".preview-icon");
+      const editIcon = elements.previewBtn.querySelector(".edit-icon");
+
+      if (isPreview) {
+        elements.previewArea.classList.remove("active");
+        elements.noteArea.classList.remove("hidden");
+        elements.previewBtn.title = "Show preview";
+        previewIcon.style.display = "block";
+        editIcon.style.display = "none";
+      } else {
+        try {
+          const content = elements.noteArea.value;
+          elements.previewArea.innerHTML = md.render(content);
+          elements.previewArea.classList.add("active");
+          elements.noteArea.classList.add("hidden");
+          elements.previewBtn.title = "Edit note";
+          previewIcon.style.display = "none";
+          editIcon.style.display = "block";
+        } catch (error) {
+          console.error('Error parsing markdown:', error);
+        }
+      }
+    },
+
     setupEventListeners() {
       // Theme toggle
       elements.darkModeToggle.addEventListener("click", () => ThemeController.toggle());
@@ -337,6 +377,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Export
       elements.exportBtn.addEventListener("click", () => UI.exportNote());
+
+      // Preview
+      elements.previewBtn.addEventListener("click", () => UI.togglePreview());
     }
   };
 
