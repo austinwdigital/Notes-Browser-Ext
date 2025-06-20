@@ -11,13 +11,14 @@
 
 :root {
   /* Color Palette */
-  --color-primary: #000;
-  --color-primary-alt: #333;
-  --color-background: #fff;
-  --color-surface: #fafafa;
-  --color-border: #e5e5e5;
+  --color-primary: #374151;
+  --color-primary-alt: #6b7280;
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-border: #e5e7eb;
   --color-border-focus: #4f46e5;
-  --color-text-muted: #666;
+  --color-focus-ring: rgba(79, 70, 229, 0.1);
+  --color-text-muted: #6b7280;
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
@@ -31,11 +32,17 @@
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg,
-      rgba(79, 70, 229, 0.08) 0%,
-      rgba(45, 212, 191, 0.08) 25%,
-      rgba(139, 92, 246, 0.08) 50%,
-      rgba(236, 72, 153, 0.08) 75%,
-      rgba(59, 130, 246, 0.08) 100%);
+      rgba(180, 198, 255, 0.45) 0%,
+      /* pastel indigo */
+      rgba(180, 255, 245, 0.35) 25%,
+      /* pastel teal */
+      rgba(220, 200, 255, 0.40) 50%,
+      /* pastel purple */
+      rgba(255, 210, 235, 0.38) 75%,
+      /* pastel pink */
+      rgba(200, 225, 255, 0.42) 100%
+      /* pastel blue */
+    );
 
   --gradient-dark: linear-gradient(135deg,
       rgba(79, 70, 229, 0.15) 0%,
@@ -111,7 +118,29 @@
     --color-text-muted: #a3a3a3;
     --color-hover-light: var(--color-hover-dark);
     --color-hover-medium: rgba(255, 255, 255, 0.15);
+    --color-focus-ring: rgba(79, 70, 229, 0.2);
   }
+
+  #app {
+    background: var(--gradient-dark);
+  }
+}
+
+/* Manual dark mode class override */
+body.dark {
+  --color-primary: #e5e5e5;
+  --color-primary-alt: #d1d1d1;
+  --color-background: #1a1a1a;
+  --color-surface: #2a2a2a;
+  --color-border: #404040;
+  --color-text-muted: #a3a3a3;
+  --color-hover-light: var(--color-hover-dark);
+  --color-hover-medium: rgba(255, 255, 255, 0.15);
+  --color-focus-ring: rgba(79, 70, 229, 0.2);
+}
+
+body.dark #app {
+  background: var(--gradient-dark);
 }
 
 /* ==========================================================================
@@ -157,6 +186,7 @@ body {
   background-size: 400% 400%;
   animation: gradient-shift 20s ease infinite;
   position: relative;
+  transition: background var(--transition-slow);
 }
 
 @keyframes gradient-shift {
@@ -185,6 +215,8 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header-left h1 {
@@ -197,20 +229,21 @@ body {
 /* Note Controls */
 .note-controls {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-md);
   margin-bottom: var(--space-md);
 }
 
 .note-title-container {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .note-actions {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
   gap: var(--space-xs);
-  flex-shrink: 0;
 }
 
 /* Footer */
@@ -253,7 +286,7 @@ body {
 .modal-input:focus {
   outline: none;
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .note-selector {
@@ -285,7 +318,7 @@ textarea {
 textarea:focus {
   outline: none;
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 textarea::placeholder {
@@ -689,25 +722,8 @@ body.dark .moon-icon {
 }
 
 /* ==========================================================================
-   Dark Mode Overrides
+   Dark Mode Additional Overrides
    ========================================================================== */
-
-body.dark {
-  --color-primary: #e5e5e5;
-  --color-primary-alt: #d1d1d1;
-  --color-background: #1a1a1a;
-  --color-surface: #2a2a2a;
-  --color-border: #404040;
-  --color-text-muted: #a3a3a3;
-  --color-hover-light: var(--color-hover-dark);
-  --color-hover-medium: rgba(255, 255, 255, 0.15);
-  background: #1a1a1a;
-}
-
-#app.dark {
-  background: var(--gradient-dark);
-  background-size: 400% 400%;
-}
 
 body.dark .btn-icon:hover,
 body.dark .theme-toggle:hover {
@@ -723,7 +739,8 @@ body.dark .note-selector {
    ========================================================================== */
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -731,12 +748,17 @@ body.dark .note-selector {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-sm);
+  background: var(--color-hover-medium);
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  background: var(--color-primary-alt);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* ==========================================================================

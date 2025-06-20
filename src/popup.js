@@ -105,8 +105,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const ThemeController = {
     init() {
       const savedTheme = localStorage.getItem(STORAGE_KEYS.DARK_MODE);
+
       if (savedTheme === 'enabled') {
         this.enable();
+      } else if (savedTheme === 'disabled') {
+        this.disable();
+      } else {
+        // No saved preference, check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          this.enable();
+        } else {
+          this.disable();
+        }
       }
     },
 
