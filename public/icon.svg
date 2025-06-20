@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient">
+            <stop stop-color="#4285F4" offset="0%"></stop>
+            <stop stop-color="#0D6EFD" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Background rounded rectangle -->
+        <rect fill="url(#linearGradient)" x="0" y="0" width="128" height="128" rx="16"></rect>
+
+        <!-- Folded corner triangle in top right -->
+        <path d="M112,0 L128,16 L112,16 Z" fill="#FFFFFF"></path>
+
+        <!-- Note lines -->
+        <g stroke="#FFFFFF" stroke-width="6" stroke-linecap="round">
+            <path d="M24,48 L88,48"></path>
+            <path d="M24,72 L72,72"></path>
+        </g>
+    </g>
+</svg>

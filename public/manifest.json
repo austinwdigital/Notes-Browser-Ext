@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Quick Note",
+  "version": "1.0.0",
+  "description": "A modern, lightweight notepad browser extension with markdown support and dark mode",
+  "permissions": [
+    "storage"
+  ],
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon-16.png",
+      "32": "icon-32.png",
+      "48": "icon-48.png",
+      "128": "icon-128.png"
+    },
+    "default_title": "Quick Note - Take notes instantly"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "markdown-it.min.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "homepage_url": "https://github.com/austinwdigital/quick-note-browser-extension",
+  "author": "austinwdigital",
+  "short_name": "QuickNote"
+}
