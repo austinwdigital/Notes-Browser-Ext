@@ -1,0 +1,41 @@
+{
+  "name": "quick-note-browser-extension",
+  "version": "1.0.0",
+  "description": "A simple, modern notepad browser extension with markdown support",
+  "main": "src/popup.js",
+  "scripts": {
+    "dev": "npm run build && npm run watch",
+    "build": "npm run clean && npm run copy-assets && npm run bundle",
+    "watch": "chokidar 'src/**/*' 'public/**/*' -c 'npm run build'",
+    "clean": "rm -rf dist && mkdir -p dist",
+    "copy-assets": "cp -r public/* dist/ && cp src/*.html dist/ && cp src/*.css dist/",
+    "bundle": "cp src/*.js dist/",
+    "package": "npm run build && cd dist && zip -r ../quick-note-extension.zip .",
+    "icons": "node generate-icons.js",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write src/**/*.{js,html,css}"
+  },
+  "keywords": [
+    "browser-extension",
+    "notes",
+    "markdown",
+    "notepad",
+    "productivity"
+  ],
+  "author": "austinwdigital",
+  "license": "MIT",
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "sharp": "^0.33.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/austinwdigital/quick-note-browser-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/austinwdigital/quick-note-browser-extension/issues"
+  },
+  "homepage": "https://github.com/austinwdigital/quick-note-browser-extension#readme"
+}
