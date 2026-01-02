@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     currentNoteId: null,
     saveTimeout: null,
     debounceTimeout: null,
-    isPreviewMode: false
+    isPreviewMode: false,
+    isInitialized: false
   };
 
   // Constants
@@ -62,49 +63,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const DEBOUNCE_DELAY = 500;
   const SAVE_STATUS_DURATION = 2000;
+  const MAX_NOTES = 100; // Prevent memory issues
+  const MAX_NOTE_SIZE = 1000000; // 1MB per note
 
   /**
-   * Storage Controller - Handles all localStorage operations
+   * Storage Controller - Handles all Chrome Storage API operations
    */
   const Storage = {
-    get: (key, defaultValue = {}) => {
+    get: async (key, defaultValue = {}) => {
       try {
-        return JSON.parse(localStorage.getItem(key)) || defaultValue;
+        const result = await chrome.storage.local.get(key);
+        return result[key] !== undefined ? result[key] : defaultValue;
       } catch (error) {
-        console.error(`Error parsing localStorage item ${key}:`, error);
+        console.error(`Error getting storage item ${key}:`, error);
         return defaultValue;
       }
     },
 
-    set: (key, value) => {
+    set: async (key, value) => {
       try {
-        localStorage.setItem(key, JSON.stringify(value));
+        await chrome.storage.local.set({ [key]: value });
       } catch (error) {
-        console.error(`Error setting localStorage item ${key}:`, error);
+        console.error(`Error setting storage item ${key}:`, error);
       }
     },
 
-    remove: (key) => {
+    remove: async (key) => {
       try {
-        localStorage.removeItem(key);
+        await chrome.storage.local.remove(key);
       } catch (error) {
-        console.error(`Error removing localStorage item ${key}:`, error);
+        console.error(`Error removing storage item ${key}:`, error);
       }
     },
 
     // Note-specific methods
-    getNotes: () => Storage.get(STORAGE_KEYS.NOTES),
-    setNotes: (notes) => Storage.set(STORAGE_KEYS.NOTES, notes),
-    getLastNoteId: () => localStorage.getItem(STORAGE_KEYS.LAST_NOTE_ID),
-    setLastNoteId: (id) => localStorage.setItem(STORAGE_KEYS.LAST_NOTE_ID, id)
+    getNotes: async () => Storage.get(STORAGE_KEYS.NOTES, {}),
+    setNotes: async (notes) => Storage.set(STORAGE_KEYS.NOTES, notes),
+    getLastNoteId: async () => {
+      const result = await Storage.get(STORAGE_KEYS.LAST_NOTE_ID, null);
+      return result;
+    },
+    setLastNoteId: async (id) => Storage.set(STORAGE_KEYS.LAST_NOTE_ID, id)
   };
 
   /**
    * Theme Controller - Manages dark/light mode
    */
   const ThemeController = {
-    init() {
-      const savedTheme = localStorage.getItem(STORAGE_KEYS.DARK_MODE);
+    async init() {
+      const savedTheme = await Storage.get(STORAGE_KEYS.DARK_MODE, null);
 
       if (savedTheme === 'enabled') {
         this.enable();
@@ -135,14 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.darkModeToggle.classList.remove('dark');
     },
 
-    toggle() {
+    async toggle() {
       const isDark = document.body.classList.contains('dark');
       if (isDark) {
         this.disable();
-        localStorage.setItem(STORAGE_KEYS.DARK_MODE, 'disabled');
+        await Storage.set(STORAGE_KEYS.DARK_MODE, 'disabled');
       } else {
         this.enable();
-        localStorage.setItem(STORAGE_KEYS.DARK_MODE, 'enabled');
+        await Storage.set(STORAGE_KEYS.DARK_MODE, 'enabled');
       }
     }
   };
@@ -162,8 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
           return null;
         }
 
+        const notes = await Storage.getNotes();
+
+        // Check note limit
+        if (Object.keys(notes).length >= MAX_NOTES) {
+          alert('Maximum number of notes reached. Please delete some notes before creating new ones.');
+          return null;
+        }
+
         const noteId = `note_${Date.now()}`;
-        const notes = Storage.getNotes();
 
         notes[noteId] = {
           title: title.trim(),
@@ -172,12 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
           lastModified: Date.now()
         };
 
-        Storage.setNotes(notes);
+        await Storage.setNotes(notes);
         await this.loadNotesList();
-        this.loadNote(noteId);
+        await this.loadNote(noteId);
         return noteId;
       } catch (error) {
         console.error('Error creating note:', error);
+        alert('Failed to create note. Please try again.');
         return null;
       }
     },
@@ -188,11 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async loadNote(noteId) {
       try {
-        const notes = Storage.getNotes();
+        const notes = await Storage.getNotes();
         if (notes[noteId]) {
           state.currentNoteId = noteId;
           elements.noteArea.value = notes[noteId].content;
-          Storage.setLastNoteId(noteId);
+          await Storage.setLastNoteId(noteId);
           elements.noteSelector.value = noteId;
 
           // Reset preview mode when loading a new note
@@ -214,21 +229,30 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        const notes = Storage.getNotes();
+        const content = elements.noteArea.value;
+
+        // Check note size
+        if (content.length > MAX_NOTE_SIZE) {
+          alert('Note is too large. Please reduce the content size.');
+          return;
+        }
+
+        const notes = await Storage.getNotes();
         const currentNote = notes[state.currentNoteId];
 
         if (currentNote) {
           notes[state.currentNoteId] = {
             ...currentNote,
-            content: elements.noteArea.value,
+            content: content,
             lastModified: Date.now()
           };
 
-          Storage.setNotes(notes);
+          await Storage.setNotes(notes);
           UI.showSaveStatus();
         }
       } catch (error) {
         console.error('Error saving note:', error);
+        alert('Failed to save note. Your changes may not be persisted.');
       }
     },
 
@@ -238,9 +262,9 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async deleteNote(noteId) {
       try {
-        const notes = Storage.getNotes();
+        const notes = await Storage.getNotes();
         delete notes[noteId];
-        Storage.setNotes(notes);
+        await Storage.setNotes(notes);
 
         // If no notes left, create a default one
         if (Object.keys(notes).length === 0) {
@@ -250,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Load the most recently modified note
           const sortedNotes = Object.entries(notes)
             .sort(([, a], [, b]) => b.lastModified - a.lastModified);
-          this.loadNote(sortedNotes[0][0]);
+          await this.loadNote(sortedNotes[0][0]);
         }
       } catch (error) {
         console.error('Error deleting note:', error);
@@ -268,11 +292,11 @@ document.addEventListener('DOMContentLoaded', () => {
           return false;
         }
 
-        const notes = Storage.getNotes();
+        const notes = await Storage.getNotes();
         if (notes[noteId]) {
           notes[noteId].title = newTitle.trim();
           notes[noteId].lastModified = Date.now();
-          Storage.setNotes(notes);
+          await Storage.setNotes(notes);
           await this.loadNotesList();
           elements.noteSelector.value = noteId;
           return true;
@@ -289,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async loadNotesList() {
       try {
-        const notes = Storage.getNotes();
+        const notes = await Storage.getNotes();
         elements.noteSelector.innerHTML = '<option value="" disabled>Select a note...</option>';
 
         const sortedNotes = Object.entries(notes)
@@ -303,11 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Load the last active note if it exists
-        const lastNoteId = Storage.getLastNoteId();
+        const lastNoteId = await Storage.getLastNoteId();
         if (lastNoteId && notes[lastNoteId]) {
-          this.loadNote(lastNoteId);
+          await this.loadNote(lastNoteId);
         } else if (sortedNotes.length > 0) {
-          this.loadNote(sortedNotes[0][0]);
+          await this.loadNote(sortedNotes[0][0]);
         }
       } catch (error) {
         console.error('Error loading notes list:', error);
@@ -337,12 +361,13 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async exportNote() {
       try {
-        if (!elements.noteArea.value.trim()) {
-          alert('No content to export');
+        const content = elements.noteArea.value.trim();
+        if (!content) {
+          this.showToast('No content to export', 'warning');
           return;
         }
 
-        const notes = Storage.getNotes();
+        const notes = await Storage.getNotes();
         const currentNote = notes[state.currentNoteId];
         const filename = currentNote ? `${currentNote.title}.txt` : 'quick-note.txt';
 
@@ -353,10 +378,29 @@ document.addEventListener('DOMContentLoaded', () => {
         a.download = filename.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         a.click();
         URL.revokeObjectURL(url);
+
+        this.showToast('Note exported successfully', 'success');
       } catch (error) {
         console.error('Error exporting note:', error);
-        alert('Failed to export note');
+        this.showToast('Failed to export note', 'error');
       }
+    },
+
+    /**
+     * Show a temporary toast message
+     */
+    showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 10);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
     },
 
     /**
@@ -417,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const content = elements.noteArea.value;
           if (!content.trim()) {
-            alert('No content to preview');
+            UI.showToast('No content to preview', 'warning');
             return;
           }
           elements.previewArea.innerHTML = md.render(content);
@@ -429,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
           state.isPreviewMode = true;
         } catch (error) {
           console.error('Error parsing markdown:', error);
-          alert('Failed to render markdown preview');
+          UI.showToast('Failed to render markdown preview', 'error');
         }
       }
     },
@@ -446,16 +490,16 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.showCreateNoteModal();
       });
 
-      elements.noteSelector.addEventListener('change', () => {
+      elements.noteSelector.addEventListener('change', async () => {
         const selectedNoteId = elements.noteSelector.value;
         if (selectedNoteId) {
-          NotesController.loadNote(selectedNoteId);
+          await NotesController.loadNote(selectedNoteId);
         }
       });
 
-      elements.editTitleBtn.addEventListener('click', () => {
+      elements.editTitleBtn.addEventListener('click', async () => {
         if (state.currentNoteId) {
-          const notes = Storage.getNotes();
+          const notes = await Storage.getNotes();
           const currentNote = notes[state.currentNoteId];
           if (currentNote) {
             UI.showEditTitleModal(currentNote.title);
@@ -491,13 +535,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.debounceTimeout) {
           clearTimeout(state.debounceTimeout);
         }
-        state.debounceTimeout = setTimeout(() => {
-          NotesController.saveNote();
+        state.debounceTimeout = setTimeout(async () => {
+          await NotesController.saveNote();
         }, DEBOUNCE_DELAY);
       });
 
       // Manual save
-      elements.saveBtn.addEventListener('click', () => NotesController.saveNote());
+      elements.saveBtn.addEventListener('click', async () => await NotesController.saveNote());
 
       // Delete confirmation modal
       elements.clearBtn.addEventListener('click', () => {
@@ -558,11 +602,11 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.previewBtn.addEventListener('click', () => UI.togglePreview());
 
       // Keyboard shortcuts
-      document.addEventListener('keydown', (e) => {
+      document.addEventListener('keydown', async (e) => {
         // Ctrl/Cmd + S to save
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
           e.preventDefault();
-          NotesController.saveNote();
+          await NotesController.saveNote();
         }
         // Ctrl/Cmd + N to create new note
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
@@ -590,12 +634,18 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   const init = async () => {
     try {
-      ThemeController.init();
+      // Prevent double initialization
+      if (state.isInitialized) {
+        return;
+      }
+      state.isInitialized = true;
+
+      await ThemeController.init();
       UI.setupEventListeners();
       await NotesController.loadNotesList();
 
       // Create a default note if none exist
-      const notes = Storage.getNotes();
+      const notes = await Storage.getNotes();
       if (Object.keys(notes).length === 0) {
         await NotesController.createNote('Welcome to Quick Note!');
       }
@@ -603,6 +653,12 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error initializing application:', error);
     }
   };
+
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    if (state.saveTimeout) clearTimeout(state.saveTimeout);
+    if (state.debounceTimeout) clearTimeout(state.debounceTimeout);
+  });
 
   // Start the application
   init();

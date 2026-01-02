@@ -1,17 +1,20 @@
 {
   "manifest_version": 3,
   "name": "Quick Note",
-  "version": "1.0",
-  "description": "A simple notepad browser extension.",
-  "permissions": [],
+  "version": "1.0.1",
+  "description": "A simple, fast notepad browser extension with markdown support.",
+  "permissions": [
+    "storage"
+  ],
   "icons": {
-    "48": "icon.png"
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   },
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png",
-    "default_width": 400,
-    "default_height": 500
+    "default_title": "Quick Note"
   },
   "web_accessible_resources": [
     {

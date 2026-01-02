@@ -1,15 +1,28 @@
 # Quick Note Browser Extension
 
-> **Note:** This is a work in progress. Please feel free to contribute!
+> **Version 1.0.1** - Optimized for performance and reliability
+
+A fast, modern note-taking extension for Chrome with markdown support, multiple notes management, and a beautiful interface.
 
 This extension provides a simple yet powerful note-taking experience right in your browser with:
 
-- Clean, modern interface with dark/light mode support
-- Full markdown support with live preview
-- Multiple notes management with easy switching
-- Auto-save functionality
-- Export capabilities
-- Responsive design that works across different screen sizes
+- 🎨 Clean, modern interface with dark/light mode support
+- 📝 Full markdown support with live preview
+- 📚 Multiple notes management with easy switching
+- 💾 Auto-save functionality (using Chrome Storage API)
+- 📤 Export capabilities
+- ⚡ Optimized performance - no freezes or crashes
+- 🔔 Toast notifications for better user feedback
+
+## ✨ Recent Improvements (v1.0.1)
+
+- **Performance Optimized**: Removed CPU-intensive animations that caused browser freezes
+- **Migrated to Chrome Storage API**: Better performance and data persistence
+- **Added Error Handling**: Comprehensive error boundaries and user-friendly messages
+- **Toast Notifications**: Modern feedback system replacing intrusive alerts
+- **Memory Leak Prevention**: Proper cleanup and initialization guards
+- **Note Limits**: Prevents memory issues with max 100 notes and 1MB per note
+- **Removed External Dependencies**: No more Google Fonts - faster load times
 
 ## Features
 

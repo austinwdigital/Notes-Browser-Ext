@@ -30,26 +30,16 @@
   --color-hover-dark: rgba(255, 255, 255, 0.1);
   --color-active: rgba(79, 70, 229, 0.1);
 
-  /* Gradients */
+  /* Gradients - Simplified and static */
   --gradient-primary: linear-gradient(135deg,
-      rgba(180, 198, 255, 0.45) 0%,
-      /* pastel indigo */
-      rgba(180, 255, 245, 0.35) 25%,
-      /* pastel teal */
-      rgba(220, 200, 255, 0.40) 50%,
-      /* pastel purple */
-      rgba(255, 210, 235, 0.38) 75%,
-      /* pastel pink */
-      rgba(200, 225, 255, 0.42) 100%
-      /* pastel blue */
-    );
+      rgba(180, 198, 255, 0.25) 0%,
+      rgba(180, 255, 245, 0.20) 50%,
+      rgba(220, 200, 255, 0.22) 100%);
 
   --gradient-dark: linear-gradient(135deg,
-      rgba(79, 70, 229, 0.15) 0%,
-      rgba(45, 212, 191, 0.15) 25%,
-      rgba(139, 92, 246, 0.15) 50%,
-      rgba(236, 72, 153, 0.15) 75%,
-      rgba(59, 130, 246, 0.15) 100%);
+      rgba(79, 70, 229, 0.08) 0%,
+      rgba(45, 212, 191, 0.08) 50%,
+      rgba(139, 92, 246, 0.08) 100%);
 
   /* Spacing Scale */
   --space-xs: 4px;
@@ -183,30 +173,8 @@ body {
   flex-direction: column;
   gap: var(--space-md);
   background: var(--gradient-primary);
-  background-size: 400% 400%;
-  animation: gradient-shift 20s ease infinite;
   position: relative;
   transition: background var(--transition-slow);
-}
-
-@keyframes gradient-shift {
-
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  25% {
-    background-position: 100% 50%;
-  }
-
-  50% {
-    background-position: 50% 100%;
-  }
-
-  75% {
-    background-position: 50% 0%;
-  }
 }
 
 /* Header */
@@ -307,12 +275,13 @@ textarea {
   background: var(--color-background);
   color: var(--color-primary);
   font-size: var(--font-size-sm);
-  font-family: inherit;
+  font-family: var(--font-family-base);
   line-height: var(--line-height-relaxed);
-  resize: none;
+  resize: vertical;
   transition:
     border-color var(--transition-default),
     box-shadow var(--transition-default);
+  will-change: border-color, box-shadow;
 }
 
 textarea:focus {
@@ -866,4 +835,48 @@ body.dark .note-selector {
     border: none !important;
     box-shadow: none !important;
   }
+}
+
+/* ==========================================================================
+   Toast Notifications
+   ========================================================================== */
+
+.toast {
+  position: fixed;
+  bottom: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-tooltip);
+  opacity: 0;
+  transition: all var(--transition-default);
+  pointer-events: none;
+  max-width: 300px;
+  text-align: center;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-success {
+  background: var(--color-success);
+}
+
+.toast-error {
+  background: var(--color-danger);
+}
+
+.toast-warning {
+  background: var(--color-warning);
+}
+
+.toast-info {
+  background: var(--color-info);
 }
